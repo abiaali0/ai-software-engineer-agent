@@ -1,0 +1,5 @@
+{
+  "title": "Add CSV export",
+  "body": "Users need to export filtered reports as CSV.",
+  "repository_path": "."
+}

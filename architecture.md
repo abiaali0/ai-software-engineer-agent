@@ -1,27 +1,30 @@
-# Architecture Notes
-
-Use this document to describe the real architecture after recovering the project.
+# Architecture
 
 ## Components
 
-1. Issue ingestion
-2. Repository context retrieval
-3. Agent or prompt workflow
-4. Code-change generation
-5. Isolated Docker test execution
-6. Error analysis and repair
-7. Pull-request summary generation
-8. API layer
-9. User interface
+### Issue Analyzer
 
-## Design Decisions
+Extracts concise keywords and a short summary from an issue title and body.
 
-Document:
+### Context Retriever
 
-- Why each framework was selected
-- How repository context was retrieved
-- How prompts were structured
-- How generated code was validated
-- How Docker isolation worked
-- How failures were handled
-- What the system could not reliably do
+Searches a local repository for filenames related to the issue keywords. The current public implementation is intentionally deterministic and does not send private source code to an external model.
+
+### Implementation Planner
+
+Creates a structured engineering plan covering acceptance criteria, affected modules, implementation, tests, and validation.
+
+### Pull-Request Summary Generator
+
+Formats the issue analysis and plan into a developer-facing pull-request summary.
+
+## Future Verified Enhancements
+
+The following should only be added after implementation and testing:
+
+- GitHub API issue ingestion
+- Semantic code retrieval
+- LLM provider integration
+- Docker-isolated test execution
+- Automated failure analysis and repair
+- React user interface
