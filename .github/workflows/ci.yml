@@ -2,7 +2,7 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  test:
+  test-and-smoke:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -13,5 +13,24 @@ jobs:
       - run: pytest -q
       - name: Verify FastAPI app imports
         run: python -c "from app.main import app; assert app.title == 'AI Software Engineer Agent'"
-      - name: Verify Docker image builds
-        run: docker build -t ai-software-engineer-agent:ci .
+      - name: Build and start Docker image
+        run: |
+          docker build -t ai-software-engineer-agent:ci .
+          docker run -d --name ai-agent -p 8000:8000 ai-software-engineer-agent:ci
+      - name: Smoke test running API
+        run: |
+          for i in {1..30}; do
+            if curl --fail --silent http://localhost:8000/health | grep -q 'ok'; then break; fi
+            sleep 2
+          done
+          curl --fail --silent http://localhost:8000/health | grep -q 'ok'
+          curl --fail --silent -X POST http://localhost:8000/analyze \
+            -H 'Content-Type: application/json' \
+            -d '{"title":"Add CSV export","body":"Users need to export filtered reports as CSV.","repository_path":"."}' \
+            | grep -q 'implementation_plan'
+      - name: Show logs on failure
+        if: failure()
+        run: docker logs ai-agent || true
+      - name: Tear down
+        if: always()
+        run: docker rm -f ai-agent || true
